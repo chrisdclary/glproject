@@ -8,19 +8,21 @@ TARGET := WINDOWS
 
 # Compilation options
 INC     := -Isrc
-CFLAGS  := -std=c++17 -Wall -Wextra -Wpedantic -g -Og -march=native
+CPPFLAGS  := -std=c++17 -Wall -Wextra -Wpedantic -g -Og -march=native
+CFLAGS  := -std=gnu11 -Wall -Wextra -Wpedantic -g -Og -march=native
 LDFLAGS := -g
 LIBS    := -lSDL2
 
 # Options for specific targets
 ifeq ($(TARGET), LINUX)
-CC   := gcc
+CPP   := gcc
 LD   := $(CC)
 OUT  := testgame
 LIBS += -lGL
 else
-CC      := x86_64-w64-mingw32-g++
-LD      := $(CC)
+CPP     := x86_64-w64-mingw32-g++
+CC		:= x86_64-w64-mingw32-gcc
+LD      := $(CPP)
 OUT     := testgame.exe
 INC     += -ISDL2/x86_64-w64-mingw32/include 
 LDFLAGS += -LSDL2/x86_64-w64-mingw32/bin
@@ -57,10 +59,12 @@ $(OBJDIR):
 
 # Compilation rules for each file type
 define make-obj
-$1/%.cpp.o: %.cpp
+$1/%.c.o: %.c
 	$(CC) $(CFLAGS) $(INC) -MMD -c $$< -o $$@
+$1/%.cpp.o: %.cpp
+	$(CPP) $(CPPFLAGS) $(INC) -MMD -c $$< -o $$@
 $1/%.o: %
-	xxd -i $$< | sed 's/ src_/ /g' | $(CC) -x c -c - -o $$@
+	xxd -i $$< | sed 's/ src_/ /g' | $(CPP) -x c -c - -o $$@
 endef
 $(foreach bdir,$(OBJDIR),$(eval $(call make-obj,$(bdir))))
 
