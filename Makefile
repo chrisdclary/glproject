@@ -8,7 +8,7 @@ TARGET := WINDOWS
 
 # Compilation options
 INC     := -Isrc
-CFLAGS  := -std=gnu11 -Wall -Wextra -Wpedantic -g -Og -march=native
+CFLAGS  := -std=c++17 -Wall -Wextra -Wpedantic -g -Og -march=native
 LDFLAGS := -g
 LIBS    := -lSDL2
 
@@ -19,7 +19,7 @@ LD   := $(CC)
 OUT  := testgame
 LIBS += -lGL
 else
-CC      := x86_64-w64-mingw32-gcc
+CC      := x86_64-w64-mingw32-g++
 LD      := $(CC)
 OUT     := testgame.exe
 INC     += -ISDL2/x86_64-w64-mingw32/include 
@@ -28,7 +28,7 @@ LIBS    += -lopengl32
 endif
 
 # Get list of object files
-EXT     := c vert geom frag
+EXT     := c cpp vert geom frag
 SRCDIR  := $(shell find src -type d -print)
 OBJDIR  := $(patsubst src%,obj%,$(SRCDIR))
 SRC     := $(foreach ext,$(EXT),$(foreach sdir,$(SRCDIR),$(wildcard $(sdir)/*.$(ext))))
@@ -57,7 +57,7 @@ $(OBJDIR):
 
 # Compilation rules for each file type
 define make-obj
-$1/%.c.o: %.c
+$1/%.cpp.o: %.cpp
 	$(CC) $(CFLAGS) $(INC) -MMD -c $$< -o $$@
 $1/%.o: %
 	xxd -i $$< | sed 's/ src_/ /g' | $(CC) -x c -c - -o $$@

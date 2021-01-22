@@ -202,13 +202,14 @@ void clearWindow(){
 void processKeyboard(){
     SDL_Event event;
         if (SDL_PollEvent(&event)){
+            const Uint8 *state = SDL_GetKeyboardState(NULL);
             switch(event.type){
                 case SDL_QUIT :
                     quitSDL();
                     break;
 
-                case SDL_KEYDOWN : ;
-                    const Uint8 *state = SDL_GetKeyboardState(NULL);
+                case SDL_KEYDOWN : 
+                    
                     if (state[SDL_SCANCODE_RIGHT]){
                         printf("right arrow pressed\n");
                     }
