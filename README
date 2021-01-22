@@ -1,5 +1,2 @@
 this is a small interactive 3D program that I hope to 
 turn into something lie a game or a simulation
-
-currently compiles in C, but i will update it to compile
-as C++ so I can use more libraries for things like matrix math
