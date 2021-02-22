@@ -1,28 +1,12 @@
-#include "init.h"
+#include "game.h"
 
 int main(){
 
-    initSDL();
+    initEngine();
 
-    initOpenGL();
-
-    
-    createTriangle();
-    compileShaders();
-    
-
-        drawTriangle();
-
-    // Basic loop
     while(1){
-       
-        processKeyboard();
+
+        updateEngine();
         
-        clearWindow();
-
     }
-
-    quitSDL();
-    
-
 }

@@ -1,2 +1,3 @@
-this is a small interactive 3D program that I hope to 
-turn into something like a game or a simulation
+A prototype 3D game engine I'm working on.
+
+All of my source code is contained in the src directory

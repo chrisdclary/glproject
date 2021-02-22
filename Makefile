@@ -8,14 +8,14 @@ TARGET := WINDOWS
 
 # Compilation options
 INC     := -Isrc
-CPPFLAGS  := -std=c++17 -Wall -Wextra -Wpedantic -g -Og -march=native
-CFLAGS  := -std=gnu11 -Wall -Wextra -Wpedantic -g -Og -march=native
+CPPFLAGS  := -std=c++17 -libstdc++ -Wall -Wextra -Wpedantic -g -Og -march=native 
+CFLAGS  := -std=gnu11 -libgcc -Wall -Wextra -Wpedantic -g -Og -march=native 
 LDFLAGS := -g
 LIBS    := -lSDL2
 
 # Options for specific targets
 ifeq ($(TARGET), LINUX)
-CPP   := gcc
+CC   := gcc
 LD   := $(CC)
 OUT  := testgame
 LIBS += -lGL
@@ -24,8 +24,8 @@ CPP     := x86_64-w64-mingw32-g++
 CC		:= x86_64-w64-mingw32-gcc
 LD      := $(CPP)
 OUT     := testgame.exe
-INC     += -ISDL2/x86_64-w64-mingw32/include 
-LDFLAGS += -LSDL2/x86_64-w64-mingw32/bin
+INC     += -Ilib/SDL2/x86_64-w64-mingw32/include -Ilib/GLM -Ilib/GLEW 
+LDFLAGS += -Llib/SDL2/x86_64-w64-mingw32/bin
 LIBS    += -lopengl32
 endif
 
