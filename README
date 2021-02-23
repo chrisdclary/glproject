@@ -1,4 +1,4 @@
 A prototype 3D game engine I'm working on.
 All of my source code is contained in the src directory
 
-The .exe will only run if it's in the same directory as SDL2.dll
+The .exe will only run if it's in the same directory as the .dlls

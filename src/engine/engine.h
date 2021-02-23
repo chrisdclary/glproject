@@ -7,7 +7,7 @@
 #define WINDOW_HEIGHT       600
 
 // Mouse Sensitivity
-const float mouse_sensitivity = 0.1f;
+const float mouse_sensitivity = 0.07f;
 
 struct Player 
 {

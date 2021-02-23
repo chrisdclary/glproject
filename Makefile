@@ -1,15 +1,10 @@
-#
-#	Makefile taken from my brother, who has a more
-#	comprehensive project over at github.com/pclary/gltest
-#
-
 # Build for Windows by default
 TARGET := WINDOWS
 
 # Compilation options
 INC     := -Isrc
-CPPFLAGS  := -std=c++17 -libstdc++ -Wall -Wextra -Wpedantic -g -Og -march=native 
-CFLAGS  := -std=gnu11 -libgcc -Wall -Wextra -Wpedantic -g -Og -march=native 
+CPPFLAGS  := -static-libstdc++ -static-libgcc -std=c++17 -Wall -Wextra -Wpedantic -g -Og -march=native 
+CFLAGS  := -std=gnu11 -Wall -Wextra -Wpedantic -g -Og -march=native 
 LDFLAGS := -g
 LIBS    := -lSDL2
 
@@ -60,7 +55,7 @@ $(OBJDIR):
 # Compilation rules for each file type
 define make-obj
 $1/%.c.o: %.c
-	$(CC) $(CFLAGS) $(INC) -MMD -c $$< -o $$@
+	$(CPP) $(CPPFLAGS) $(INC) -MMD -c $$< -o $$@
 $1/%.cpp.o: %.cpp
 	$(CPP) $(CPPFLAGS) $(INC) -MMD -c $$< -o $$@
 $1/%.o: %

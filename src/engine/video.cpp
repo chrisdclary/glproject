@@ -4,13 +4,12 @@
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <string>
+#include <sstream>
+#include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-/****************
-    Variables
-*****************/
 
 // GL stuff
 GLuint VAO, VBO, IBO, shaderProgram, uniformModel, uniformProjection, uniformView;
@@ -30,44 +29,11 @@ const float fov = 45.0f; // Camera field of view
 const float near_plane = 0.1f; // Near clipping plane
 const float far_plane = 100.0f; // Far clipping plane
 
-
 // Miltiplier to get equilateral pyramid
 const float oneRootTwo = 1/sqrt(2);
 
-
 // Window
 SDL_Window *window;
-
-/********************************
-    Shaders (move these later)
-*********************************/
-
-// Vertex Shader
-static const char* vShader = "					\n\
-#version 330			                        \n\
-layout (location = 0) in vec3 pos;				\n\
-layout (location = 1) in vec3 in_color;         \n\
-												\n\
-uniform mat4 u_ModelMatrix;  					\n\
-uniform mat4 u_ProjectionMatrix;                \n\
-uniform mat4 u_ViewMatrix;                      \n\
-out vec3 vert_color;					        \n\
-                                                \n\
-void main(){									\n\
-	gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_ModelMatrix * vec4(pos, 1.0);   \n\
-    vert_color = in_color;                       \n\
-}";
-
-//Fragment Shader
-static const char* fShader = "					\n\
-#version 330									\n\
-												\n\
-in vec3 vert_color;                             \n\
-out vec4 frag_color;							\n\
-                                                \n\
-void main(){									\n\
-	frag_color = vec4(vert_color, 1.0);         \n\
-}";
 
 
 // **** Prototypes **** //
@@ -76,9 +42,7 @@ void addShader(GLuint, const char*, GLenum);
 void compileShaders();
 void createPyramid();
 
-/***************************
-    Function Definitions
-****************************/
+// **** Function Defs **** //
 
 // Initialize Video Subsystem
 void initVideo()
@@ -113,11 +77,28 @@ void initVideo()
 }
 
 // Add shader to the program
-void addShader(GLuint program, const char** shaderCode, GLenum shaderType)
+void addShader(GLuint program, const char* filename, GLenum shaderType)
 {
     GLuint shader = glCreateShader(shaderType);
 
-    glShaderSource(shader, 1, shaderCode, NULL);
+    std::stringstream ss;
+    std::ifstream file;
+    std::string codeString;
+    const GLchar* shaderCode;
+
+    try {
+        file.open(filename, std::ios::in);
+        if (!file.fail()) {
+            ss << file.rdbuf();
+            codeString = ss.str();
+        }
+    } catch (std::exception ex) {
+        printf("Failed to find shader code.");
+    }
+
+    shaderCode = codeString.c_str();
+
+    glShaderSource(shader, 1, &shaderCode, NULL);
     glCompileShader(shader);
 
     // Check to see if shader compiled
@@ -142,9 +123,10 @@ void compileShaders()
         return;
     }
 
+
     // Add shaders and link to shader program
-    addShader(shaderProgram, &vShader, GL_VERTEX_SHADER);
-    addShader(shaderProgram, &fShader, GL_FRAGMENT_SHADER);
+    addShader(shaderProgram, "src/engine/shaders/shader.vert", GL_VERTEX_SHADER);
+    addShader(shaderProgram, "src/engine/shaders/shader.frag", GL_FRAGMENT_SHADER);
 
     GLint result = 0;
 	GLchar eLog[1024] = { 0 };
@@ -163,10 +145,6 @@ void compileShaders()
 		printf("Error linking program : '%s' \n", eLog);
 		return;
 	}
-
-    // Clear shader memory after linking to save memory
-    glDeleteShader(*vShader);
-    glDeleteShader(*fShader);
 
     // Get locations for shader variables
     uniformModel = glGetUniformLocation(shaderProgram, "u_ModelMatrix");
@@ -251,7 +229,7 @@ void createPyramid()
         0.0f, -1.0f, oneRootTwo,        1.0f, 1.0f, 0.0f
     };
 
-    // Add these vertices to the buffer
+    // Add these vertices to the array object
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
@@ -260,15 +238,16 @@ void createPyramid()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+        // Bind VBO and add vertex data
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
             glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-            // position attrib
+            // position attribute
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, 0);
             glEnableVertexAttribArray(0);
-            // color attrib
+            // color attribute
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (GLvoid*)(sizeof(GLfloat) * 3));
             glEnableVertexAttribArray(1);
 
@@ -282,6 +261,14 @@ void createPyramid()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+// Update window title to show FPS
+void showFPS(int frames, unsigned int time){
+    int fps = (1000 / time) * frames;
+
+    std::ostringstream outs;
+    outs << std::fixed << "testgame.exe  |  FPS: " << fps;
+    SDL_SetWindowTitle(window, outs.str().c_str());
+}
 
 // Draw function
 void updateVideo()
@@ -328,4 +315,12 @@ void updateVideo()
 
     // Window won't update without this
     SDL_GL_SwapWindow(window);
+}
+
+void clearVideoBuffers()
+{
+    glDeleteProgram(shaderProgram);
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &IBO);
 }

@@ -8,6 +8,8 @@ void updateVideo();
 void processKeyboard();
 void playerMove(int, unsigned int);
 void cameraMove(int, int);
+void clearVideoBuffers();
+void showFPS(int, unsigned int);
 
 // Player object
 Player player;
@@ -15,8 +17,10 @@ Player player;
 // Event structure
 SDL_Event e;
 
-// Delta time 
-unsigned int lastTime = 0, deltaTime = 0, currentTime;
+// Delta time & Frame time
+unsigned int  frameTime = 0, lastTime = 0, deltaTime = 0, currentTime;
+
+int frames = 0; 
 
 void initEngine()
 {
@@ -95,6 +99,13 @@ void updateTime()
     unsigned int currentTime = SDL_GetTicks();
     deltaTime = currentTime - lastTime;
     lastTime = currentTime;
+
+    if (currentTime >= frameTime + 250){
+        showFPS(frames, (currentTime - frameTime));
+        frameTime = currentTime;
+        frames = 0;
+    }
+    frames++;
 }
 
 // Quit SDL
@@ -103,7 +114,7 @@ void quitSDL()
     printf("Quitting SDL.\n");
     
     /* Shutdown all subsystems */
-
+    clearVideoBuffers();
     SDL_Quit();
     
     printf("Quitting....\n");
