@@ -1,4 +1,5 @@
-A prototype 3D game engine I'm working on.
-All of my source code is contained in the src directory
+A 3D Platforming game I'm building from the ground up using SDL2.
+Modularity is very low at the moment, when it's more complete I may go back and make it more 
+user-friendly so other people can use the engine to make their own games.
 
-The .exe will only run if it's in the same directory as the .dlls
+All of my source code is contained in the src directory

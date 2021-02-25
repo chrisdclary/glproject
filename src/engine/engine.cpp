@@ -2,23 +2,16 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 
-// Subsystem Prototypes
-void initVideo();
-void updateVideo();
-void processKeyboard();
-void playerMove(int, unsigned int);
-void cameraMove(int, int);
-void clearVideoBuffers();
-void showFPS(int, unsigned int);
-
-// Player object
-Player player;
 
 // Event structure
 SDL_Event e;
 
 // Delta time & Frame time
-unsigned int  frameTime = 0, lastTime = 0, deltaTime = 0, currentTime;
+unsigned int  frameTime = 0, lastTime = 0, deltaTime = 0;
+
+// Initialize global objects
+Player* player = new Player;
+VertexContainer* drawVerts = new VertexContainer;
 
 int frames = 0; 
 
@@ -39,11 +32,10 @@ void initEngine()
     // Relative mouse for camera controls
     SDL_SetRelativeMouseMode(SDL_TRUE);
 
+    initLevel();
+
     // Initialize video subsystem
     initVideo();
-
-    // Initialize player values
-    player = {{0.0f, 0.0f, 3.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, 0};
 }
 
 // Process Keyboard Input

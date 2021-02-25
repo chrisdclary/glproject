@@ -1,7 +1,6 @@
 #include "engine.h"
 #include "glad/glad.h"
 #include <SDL2/SDL_opengl.h>
-#include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <string>
 #include <sstream>
@@ -14,10 +13,8 @@
 // GL stuff
 GLuint VAO, VBO, IBO, shaderProgram, uniformModel, uniformProjection, uniformView;
 
-
-// **** Camera ****
+// **** Camera **** //
 float yaw = -90.0f, pitch;
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraTarget;
 glm::vec3 cameraDir = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraRight;
@@ -25,12 +22,10 @@ glm::vec3 cameraUp;
 // Global up vector is useful for player movement and some vector initialization
 glm::vec3 globalUp = glm::vec3(0.0f, 1.0f, 0.0f);
 // Settings for perspective camera
-const float fov = 45.0f; // Camera field of view
+const float fov = 60.0f; // Camera field of view
 const float near_plane = 0.1f; // Near clipping plane
 const float far_plane = 100.0f; // Far clipping plane
 
-// Miltiplier to get equilateral pyramid
-const float oneRootTwo = 1/sqrt(2);
 
 // Window
 SDL_Window *window;
@@ -40,9 +35,12 @@ SDL_Window *window;
 
 void addShader(GLuint, const char*, GLenum);
 void compileShaders();
-void createPyramid();
+void addVertsToBuffer();
 
+
+/****************************
 // **** Function Defs **** //
+****************************/
 
 // Initialize Video Subsystem
 void initVideo()
@@ -64,34 +62,41 @@ void initVideo()
         exit(-1);
     }
 
+    
+
     // Get OpenGL function pointers
     gladLoadGLLoader(SDL_GL_GetProcAddress);
 
     // Compile vertex and fragment shaders
     compileShaders();
 
+    // Set viewport to window size
+    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     // Set base background color
     glClearColor(0.1f, 0.64f, 1.0f, 1.0f);
 
-    createPyramid();
+    addVertsToBuffer();
 }
+
+// **** Shaders **** //
 
 // Add shader to the program
 void addShader(GLuint program, const char* filename, GLenum shaderType)
 {
     GLuint shader = glCreateShader(shaderType);
 
+    // Grab our source code from the shader file
     std::stringstream ss;
     std::ifstream file;
-    std::string codeString;
+    std::string codeString; // If the code isn't saved like this, it won't work
     const GLchar* shaderCode;
-
     try {
         file.open(filename, std::ios::in);
         if (!file.fail()) {
             ss << file.rdbuf();
-            codeString = ss.str();
+            codeString = ss.str(); 
         }
+        file.close();
     } catch (std::exception ex) {
         printf("Failed to find shader code.");
     }
@@ -123,8 +128,8 @@ void compileShaders()
         return;
     }
 
-
     // Add shaders and link to shader program
+    // ---------------------------------------------------------- This needs to be modified to use the linked object files
     addShader(shaderProgram, "src/engine/shaders/shader.vert", GL_VERTEX_SHADER);
     addShader(shaderProgram, "src/engine/shaders/shader.frag", GL_FRAGMENT_SHADER);
 
@@ -155,6 +160,9 @@ void compileShaders()
 
 }
 
+
+// **** Controls **** //
+
 // Handle WASD 
 void playerMove(int i, unsigned int delta)
 {
@@ -162,22 +170,22 @@ void playerMove(int i, unsigned int delta)
     const float speed = 0.005f * delta;
     switch(i){
         case 0 : // W
-            cameraPos += glm::normalize(glm::cross(cameraRight, globalUp)) * speed;
+            player->position += glm::normalize(glm::cross(cameraRight, globalUp)) * speed;
             break;
         case 1 : // A
-            cameraPos -= glm::normalize(glm::cross(cameraDir, cameraUp)) * speed;
+            player->position -= glm::normalize(glm::cross(cameraDir, cameraUp)) * speed;
             break;
         case 2 : // S
-            cameraPos -= glm::normalize(glm::cross(cameraRight, globalUp)) * speed;
+            player->position -= glm::normalize(glm::cross(cameraRight, globalUp)) * speed;
             break;
         case 3 : // D
-            cameraPos += glm::normalize(glm::cross(cameraDir, cameraUp)) * speed;
+            player->position += glm::normalize(glm::cross(cameraDir, cameraUp)) * speed;
             break;
         case 4 : // Space
-            cameraPos += globalUp * speed;
+            player->position += globalUp * speed;
             break;
         case 5 : // Shift
-            cameraPos -= globalUp * speed;
+            player->position -= globalUp * speed;
             break;
         default:
             break;
@@ -210,24 +218,10 @@ void cameraMove(int x, int y)
 }
 
 
-// Create a stupid pyramid
-void createPyramid()
-{
-    // Draw order for IBO
-    unsigned int indices[] = {
-        3, 1, 0,
-        3, 2, 0,
-        0, 2, 1, 
-        1, 2, 3
-    };
 
-    GLfloat vertices[] = {
-        // Position                     // Color
-        1.0f, 0.0f, oneRootTwo * -1,    1.0f, 0.0f, 0.0f,
-        -1.0f, 0.0f, oneRootTwo * -1,   0.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, oneRootTwo,         0.0f, 0.0f, 1.0f,
-        0.0f, -1.0f, oneRootTwo,        1.0f, 1.0f, 0.0f
-    };
+// Load vertex data from drawVerts into VBO
+void addVertsToBuffer()
+{
 
     // Add these vertices to the array object
     glGenVertexArrays(1, &VAO);
@@ -236,23 +230,23 @@ void createPyramid()
     // Bind IBO and add indices
     glGenBuffers(1, &IBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, drawVerts->indices.size() * sizeof(GLfloat), drawVerts->indices.data(), GL_STATIC_DRAW);
 
-        // Bind VBO and add vertex data
-        glGenBuffers(1, &VBO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    // Bind VBO and add vertex data
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, drawVerts->vertices.size() * sizeof(GLfloat), drawVerts->vertices.data(), GL_STATIC_DRAW);
 
-            // position attribute
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, 0);
-            glEnableVertexAttribArray(0);
-            // color attribute
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (GLvoid*)(sizeof(GLfloat) * 3));
-            glEnableVertexAttribArray(1);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, 0);
+    glEnableVertexAttribArray(0);
+    // color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (GLvoid*)(sizeof(GLfloat) * 3));
+    glEnableVertexAttribArray(1);
 
-        // Unbind VBO
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // Unbind VBO
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// Unbind VAO
 	glBindVertexArray(0);
@@ -261,14 +255,6 @@ void createPyramid()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-// Update window title to show FPS
-void showFPS(int frames, unsigned int time){
-    int fps = (1000 / time) * frames;
-
-    std::ostringstream outs;
-    outs << std::fixed << "testgame.exe  |  FPS: " << fps;
-    SDL_SetWindowTitle(window, outs.str().c_str());
-}
 
 // Draw function
 void updateVideo()
@@ -277,9 +263,6 @@ void updateVideo()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(shaderProgram);
-    
-    // Perspective camera
-    glm::mat4 projection = glm::perspective(fov, (GLfloat)(WINDOW_WIDTH / WINDOW_HEIGHT), near_plane, far_plane);
 
     // **** Update camera vectors****
     // Direction vector is updated by mouse movement, 
@@ -292,12 +275,11 @@ void updateVideo()
     // Model manipulation matrix
     glm::mat4 model(1.0f);
 
-    // Scale down
-    model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
-
+    // Perspective camera
+    glm::mat4 projection = glm::perspective(glm::radians(fov), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, near_plane, far_plane);
 
     // Camera location, angle, etc.
-    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
+    glm::mat4 view = glm::lookAt(player->position, player->position + cameraDir, cameraUp);
 
     // Link model, view, and projection matrices to the vertex shader
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -307,7 +289,7 @@ void updateVideo()
     // Draw elements in the buffer
     glBindVertexArray(VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-            glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, drawVerts->indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -317,6 +299,19 @@ void updateVideo()
     SDL_GL_SwapWindow(window);
 }
 
+
+// **** Utility functions **** //
+
+// Update window title to show FPS
+void showFPS(int frames, unsigned int time){
+    int fps = (1000 / time) * frames;
+
+    std::ostringstream outs;
+    outs << std::fixed << "testgame.exe  |  FPS: " << fps;
+    SDL_SetWindowTitle(window, outs.str().c_str());
+}
+
+// Delete everything on program exit
 void clearVideoBuffers()
 {
     glDeleteProgram(shaderProgram);
