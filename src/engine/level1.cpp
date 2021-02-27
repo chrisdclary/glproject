@@ -50,15 +50,16 @@ void initLevel()
     offset = createCube(offset);
 
 
-    AllObjects->at(0).model = glm::translate(AllObjects->at(0).model, glm::vec3(0.0f, -6.0f, 0.0f));
-    AllObjects->at(2).model = glm::translate(AllObjects->at(2).model, glm::vec3(3.0f, 3.0f, 3.0f));
-    AllObjects->at(3).model = glm::translate(AllObjects->at(3).model, glm::vec3(3.0f, 3.0f, -3.0f));
-    AllObjects->at(4).model = glm::translate(AllObjects->at(4).model, glm::vec3(-3.0f, 3.0f, -3.0f));
-    AllObjects->at(5).model = glm::translate(AllObjects->at(5).model, glm::vec3(-3.0f, 3.0f, 3.0f));
-    AllObjects->at(6).model = glm::translate(AllObjects->at(6).model, glm::vec3(3.0f, -3.0f, 3.0f));
-    AllObjects->at(7).model = glm::translate(AllObjects->at(7).model, glm::vec3(3.0f, -3.0f, -3.0f));
-    AllObjects->at(8).model = glm::translate(AllObjects->at(8).model, glm::vec3(-3.0f, -3.0f, -3.0f));
-    AllObjects->at(9).model = glm::translate(AllObjects->at(9).model, glm::vec3(-3.0f, -3.0f, 3.0f));
+    AllObjects->at(0).position = glm::vec3(0.0f, -6.0f, 0.0f);
+    AllObjects->at(1).physics = true;
+    AllObjects->at(2).position = glm::vec3(3.0f, 3.0f, 3.0f);
+    AllObjects->at(3).position = glm::vec3(3.0f, 3.0f, -3.0f);
+    AllObjects->at(4).position = glm::vec3(-3.0f, 3.0f, -3.0f);
+    AllObjects->at(5).position = glm::vec3(-3.0f, 3.0f, 3.0f);
+    AllObjects->at(6).position = glm::vec3(3.0f, -3.0f, 3.0f);
+    AllObjects->at(7).position = glm::vec3(3.0f, -3.0f, -3.0f);
+    AllObjects->at(8).position = glm::vec3(-3.0f, -3.0f, -3.0f);
+    AllObjects->at(9).position = glm::vec3(-3.0f, -3.0f, 3.0f);
 
 }
 

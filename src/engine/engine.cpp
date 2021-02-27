@@ -122,4 +122,5 @@ void updateEngine()
     updateTime();
     processKeyboard();
     pollEvents();
+    doPhysics(deltaTime);
 }

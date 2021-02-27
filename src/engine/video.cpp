@@ -23,7 +23,7 @@ glm::vec3 globalUp = glm::vec3(0.0f, 1.0f, 0.0f);
 // Settings for perspective camera
 const float fov = 60.0f; // Camera field of view
 const float near_plane = 0.1f; // Near clipping plane
-const float far_plane = 100.0f; // Far clipping plane
+const float far_plane = 200.0f; // Far clipping plane
 
 
 // Window
@@ -166,7 +166,7 @@ void compileShaders()
 void playerMove(int i, unsigned int delta)
 {
     // Modify movement amount based on delta time
-    const float speed = 0.005f * delta;
+    const float speed = 0.025f * delta;
     switch(i){
         case 0 : // W
             player->position += glm::normalize(glm::cross(cameraRight, globalUp)) * speed;
@@ -181,7 +181,11 @@ void playerMove(int i, unsigned int delta)
             player->position += glm::normalize(glm::cross(cameraDir, cameraUp)) * speed;
             break;
         case 4 : // Space
-            player->position += globalUp * speed;
+            if(player->state == 0){
+                player->state = 1;
+                player->velocity.y = 0.05f;
+            }
+            
             break;
         case 5 : // Shift
             player->position -= globalUp * speed;
@@ -293,7 +297,7 @@ void updateVideo()
     // Draw all objects
     unsigned int offset = 0;
     for(Object o : *AllObjects){
-        model = o.model;
+        model = glm::translate(glm::mat4(1.0f), o.position);
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         glDrawElements(GL_TRIANGLES, o.indexCount, GL_UNSIGNED_INT, (void*)(offset * sizeof(GLuint)));
         offset += o.indexCount;
