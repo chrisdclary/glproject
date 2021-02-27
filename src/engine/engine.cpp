@@ -12,7 +12,9 @@ unsigned int  frameTime = 0, lastTime = 0, deltaTime = 0;
 // Initialize global objects
 Player* player = new Player;
 VertexContainer* drawVerts = new VertexContainer;
+std::vector <Object>* AllObjects = new std::vector <Object>;
 
+// Initialize framerate counter
 int frames = 0; 
 
 void initEngine()

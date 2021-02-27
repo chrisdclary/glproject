@@ -7,7 +7,6 @@
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 // GL stuff
@@ -227,15 +226,16 @@ void addVertsToBuffer()
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    // Bind IBO and add indices
+    // Bind IBO 
     glGenBuffers(1, &IBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, drawVerts->indices.size() * sizeof(GLfloat), drawVerts->indices.data(), GL_STATIC_DRAW);
-
-    // Bind VBO and add vertex data
+    
+    // Bind VBO 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
+    // Add vertex data from AllObjects to the buffers   
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, drawVerts->indices.size() * sizeof(unsigned int), drawVerts->indices.data(), GL_STATIC_DRAW);
     glBufferData(GL_ARRAY_BUFFER, drawVerts->vertices.size() * sizeof(GLfloat), drawVerts->vertices.data(), GL_STATIC_DRAW);
 
     // position attribute
@@ -286,11 +286,20 @@ void updateVideo()
     glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
     glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
         
-    // Draw elements in the buffer
+    // Bind VAO and IBO
     glBindVertexArray(VAO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-            glDrawElements(GL_TRIANGLES, drawVerts->indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+
+    // Draw all objects
+    unsigned int offset = 0;
+    for(Object o : *AllObjects){
+        model = o.model;
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        glDrawElements(GL_TRIANGLES, o.indexCount, GL_UNSIGNED_INT, (void*)(offset * sizeof(GLuint)));
+        offset += o.indexCount;
+    }
+
+    glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glUseProgram(0);

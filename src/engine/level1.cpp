@@ -6,12 +6,16 @@
 // Prototypes
 void addVertsToBuffer();
 
+unsigned int createCube(unsigned int);
+
 // Load level data into drawVerts
 void initLevel()
 {
+    // Player starting position
+    player->position = glm::vec3(0.0f, 0.0f, 10.0f);
 
     printf("initializing level");
-    unsigned int cur = 0; // Current location for IBO
+    unsigned int offset = 0;
 
     std::vector <float> groundData = {
         -100.0f, -2.0f, -100.0f,        1.0f, 0.0f, 0.0f,
@@ -21,44 +25,40 @@ void initLevel()
     };
 
     std::vector <unsigned int> groundIndex = {
-        cur+0, cur+1, cur+2,
-        cur+0, cur+2, cur+3
+        offset+0, offset+1, offset+2,
+        offset+0, offset+2, offset+3
     };
 
-    cur += (groundData.size() / 6); // there are 6 attributes per vertex, so this gives us the number of vertices
+    offset += (groundData.size() / 6); // there are 6 attributes per vertex, so this gives us the number of vertices
 
-    std::vector <float> cubeData = {
-        -1.0f, -1.0, 1.0f,              1.0f, 0.0f, 0.0f,
-        1.0f, -1.0f, 1.0f,              0.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 1.0f,               0.0f, 0.0f, 1.0f,
-        -1.0f, 1.0f, 1.0f,              1.0f, 1.0f, 0.0f,
-
-        -1.0f, -1.0, -1.0f,              0.0f, 0.0f, 1.0f,
-        1.0f, -1.0f, -1.0f,              1.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, -1.0f,               1.0f, 0.0f, 0.0f,
-        -1.0f, 1.0f, -1.0f,              0.0f, 1.0f, 0.0f
-    };
-
-    std::vector <unsigned int> cubeIndex = {
-        cur+0, cur+1, cur+2,
-        cur+2, cur+3, cur+0,
-        cur+1, cur+5, cur+6, 
-        cur+6, cur+2, cur+1,
-        cur+5, cur+4, cur+7,
-        cur+7, cur+6, cur+5,
-        cur+4, cur+0, cur+3,
-        cur+3, cur+7, cur+4,
-        cur+3, cur+2, cur+6,
-        cur+6, cur+7, cur+3,
-        cur+4, cur+5, cur+1,
-        cur+1, cur+0, cur+4,
-    };
+    Object level;
+    level.indexCount  = groundIndex.size();
+    AllObjects->push_back(level);
 
     // Add geometry to the list of vertices to be drawn
     drawVerts->vertices.insert(drawVerts->vertices.end(), groundData.begin(), groundData.end());
     drawVerts->indices.insert(drawVerts->indices.end(), groundIndex.begin(), groundIndex.end());
-    drawVerts->vertices.insert(drawVerts->vertices.end(), cubeData.begin(), cubeData.end());
-    drawVerts->indices.insert(drawVerts->indices.end(), cubeIndex.begin(), cubeIndex.end());
+
+    offset = createCube(offset);
+    offset = createCube(offset);
+    offset = createCube(offset);
+    offset = createCube(offset);
+    offset = createCube(offset);
+    offset = createCube(offset);
+    offset = createCube(offset);
+    offset = createCube(offset);
+    offset = createCube(offset);
+
+
+    AllObjects->at(0).model = glm::translate(AllObjects->at(0).model, glm::vec3(0.0f, -6.0f, 0.0f));
+    AllObjects->at(2).model = glm::translate(AllObjects->at(2).model, glm::vec3(3.0f, 3.0f, 3.0f));
+    AllObjects->at(3).model = glm::translate(AllObjects->at(3).model, glm::vec3(3.0f, 3.0f, -3.0f));
+    AllObjects->at(4).model = glm::translate(AllObjects->at(4).model, glm::vec3(-3.0f, 3.0f, -3.0f));
+    AllObjects->at(5).model = glm::translate(AllObjects->at(5).model, glm::vec3(-3.0f, 3.0f, 3.0f));
+    AllObjects->at(6).model = glm::translate(AllObjects->at(6).model, glm::vec3(3.0f, -3.0f, 3.0f));
+    AllObjects->at(7).model = glm::translate(AllObjects->at(7).model, glm::vec3(3.0f, -3.0f, -3.0f));
+    AllObjects->at(8).model = glm::translate(AllObjects->at(8).model, glm::vec3(-3.0f, -3.0f, -3.0f));
+    AllObjects->at(9).model = glm::translate(AllObjects->at(9).model, glm::vec3(-3.0f, -3.0f, 3.0f));
 
 }
 
