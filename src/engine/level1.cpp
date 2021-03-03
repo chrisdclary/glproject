@@ -12,16 +12,16 @@ unsigned int createCube(unsigned int);
 void initLevel()
 {
     // Player starting position
-    player->position = glm::vec3(0.0f, 0.0f, 10.0f);
+    player->position = glm::vec3(0.0f, 2.0f, 10.0f);
 
     printf("initializing level");
     unsigned int offset = 0;
 
     std::vector <float> groundData = {
-        -100.0f, -2.0f, -100.0f,        1.0f, 0.0f, 0.0f,
-        100.0f, -2.0f, -100.0f,         1.0f, 0.0f, 0.0f,
-        100.0f, -2.0f, 100.0f,          0.0f, 0.0f, 1.0f,
-        -100.0f, -2.0f, 100.0f,         0.0f, 0.0f, 1.0f
+        -100.0f, 0.0f, -100.0f,        1.0f, 0.0f, 0.0f,
+        100.0f, 0.0f, -100.0f,         1.0f, 0.0f, 0.0f,
+        100.0f, 0.0f, 100.0f,          0.0f, 0.0f, 1.0f,
+        -100.0f, 0.0f, 100.0f,         0.0f, 0.0f, 1.0f
     };
 
     std::vector <unsigned int> groundIndex = {
@@ -43,23 +43,18 @@ void initLevel()
     offset = createCube(offset);
     offset = createCube(offset);
     offset = createCube(offset);
-    offset = createCube(offset);
-    offset = createCube(offset);
-    offset = createCube(offset);
-    offset = createCube(offset);
-    offset = createCube(offset);
 
+    AllObjects->at(0).position = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    AllObjects->at(0).position = glm::vec3(0.0f, -6.0f, 0.0f);
-    AllObjects->at(1).physics = true;
-    AllObjects->at(2).position = glm::vec3(3.0f, 3.0f, 3.0f);
-    AllObjects->at(3).position = glm::vec3(3.0f, 3.0f, -3.0f);
-    AllObjects->at(4).position = glm::vec3(-3.0f, 3.0f, -3.0f);
-    AllObjects->at(5).position = glm::vec3(-3.0f, 3.0f, 3.0f);
-    AllObjects->at(6).position = glm::vec3(3.0f, -3.0f, 3.0f);
-    AllObjects->at(7).position = glm::vec3(3.0f, -3.0f, -3.0f);
-    AllObjects->at(8).position = glm::vec3(-3.0f, -3.0f, -3.0f);
-    AllObjects->at(9).position = glm::vec3(-3.0f, -3.0f, 3.0f);
+    AllObjects->at(1).position = glm::vec3(10.0f, 5.0f, 10.0f);
+    AllObjects->at(2).position = glm::vec3(10.0f, 10.0f, -10.0f);
+    AllObjects->at(3).position = glm::vec3(-10.0f, 15.0f, -10.0f);
+    AllObjects->at(4).position = glm::vec3(-10.0f, 20.0f, 10.0f);
+
+    AllObjects->at(1).size = glm::vec3(5.0f, 1.0f, 5.0f);
+    AllObjects->at(2).size = glm::vec3(5.0f, 1.0f, 5.0f);
+    AllObjects->at(3).size = glm::vec3(5.0f, 1.0f, 5.0f);
+    AllObjects->at(4).size = glm::vec3(5.0f, 1.0f, 5.0f);
 
 }
 

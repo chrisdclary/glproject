@@ -4,7 +4,6 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include <sstream>
-#include <iostream>
 #include <fstream>
 #include <stdio.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -13,13 +12,7 @@
 GLuint VAO, VBO, IBO, shaderProgram, uniformModel, uniformProjection, uniformView;
 
 // **** Camera **** //
-float yaw = -90.0f, pitch;
-glm::vec3 cameraTarget;
-glm::vec3 cameraDir = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraRight;
 glm::vec3 cameraUp;
-// Global up vector is useful for player movement and some vector initialization
-glm::vec3 globalUp = glm::vec3(0.0f, 1.0f, 0.0f);
 // Settings for perspective camera
 const float fov = 60.0f; // Camera field of view
 const float near_plane = 0.1f; // Near clipping plane
@@ -29,12 +22,12 @@ const float far_plane = 200.0f; // Far clipping plane
 // Window
 SDL_Window *window;
 
-
 // **** Prototypes **** //
 
 void addShader(GLuint, const char*, GLenum);
 void compileShaders();
 void addVertsToBuffer();
+void checkCollision(unsigned int, glm::mat4);
 
 
 /****************************
@@ -60,8 +53,6 @@ void initVideo()
         printf("Opengl context failed to initialize: %s\n", SDL_GetError());
         exit(-1);
     }
-
-    
 
     // Get OpenGL function pointers
     gladLoadGLLoader(SDL_GL_GetProcAddress);
@@ -159,69 +150,6 @@ void compileShaders()
 
 }
 
-
-// **** Controls **** //
-
-// Handle WASD 
-void playerMove(int i, unsigned int delta)
-{
-    // Modify movement amount based on delta time
-    const float speed = 0.025f * delta;
-    switch(i){
-        case 0 : // W
-            player->position += glm::normalize(glm::cross(cameraRight, globalUp)) * speed;
-            break;
-        case 1 : // A
-            player->position -= glm::normalize(glm::cross(cameraDir, cameraUp)) * speed;
-            break;
-        case 2 : // S
-            player->position -= glm::normalize(glm::cross(cameraRight, globalUp)) * speed;
-            break;
-        case 3 : // D
-            player->position += glm::normalize(glm::cross(cameraDir, cameraUp)) * speed;
-            break;
-        case 4 : // Space
-            if(player->state == 0){
-                player->state = 1;
-                player->velocity.y = 0.05f;
-            }
-            
-            break;
-        case 5 : // Shift
-            player->position -= globalUp * speed;
-            break;
-        default:
-            break;
-    }
-}
-
-// Handle mouse movement
-void cameraMove(int x, int y)
-{
-    yaw += (float)x * mouse_sensitivity;
-    pitch += (float)y * mouse_sensitivity;
-
-    // Camera gets weird if the player looks too high/low
-    if(pitch > 89.9f)
-        pitch = 89.9f;
-    else if(pitch < -89.9f)
-        pitch = -89.9f;
-
-    // Prevents overflow if player spins too much
-    if(yaw > 360.0f)
-        yaw -= 360.0f;
-    else if(yaw < -360.0f)
-        yaw += 360.0f;
-
-    // Update camera vectors
-    cameraDir.x += cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraDir.y -= sin(glm::radians(pitch));
-    cameraDir.z += sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraDir = glm::normalize(cameraDir);
-}
-
-
-
 // Load vertex data from drawVerts into VBO
 void addVertsToBuffer()
 {
@@ -237,6 +165,16 @@ void addVertsToBuffer()
     // Bind VBO 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    for (float f : drawVerts->vertices)
+        printf("%f, ", f);
+    
+    printf("\n");
+
+    for (unsigned int i : drawVerts->indices)
+        printf("%d, ", i);
+    
+    printf("\n");
 
     // Add vertex data from AllObjects to the buffers   
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, drawVerts->indices.size() * sizeof(unsigned int), drawVerts->indices.data(), GL_STATIC_DRAW);
@@ -271,8 +209,7 @@ void updateVideo()
     // **** Update camera vectors****
     // Direction vector is updated by mouse movement, 
     // so we only need to update the right and up vectors here
-    cameraRight = glm::normalize(glm::cross(globalUp, cameraDir));
-    cameraUp = glm::cross(cameraDir, cameraRight);
+    cameraUp = glm::cross(player->facing, glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), player->facing)));
 
 
     // **** Model & Projection ****
@@ -283,7 +220,7 @@ void updateVideo()
     glm::mat4 projection = glm::perspective(glm::radians(fov), (GLfloat)WINDOW_WIDTH / (GLfloat)WINDOW_HEIGHT, near_plane, far_plane);
 
     // Camera location, angle, etc.
-    glm::mat4 view = glm::lookAt(player->position, player->position + cameraDir, cameraUp);
+    glm::mat4 view = glm::lookAt(player->position, player->position + player->facing, cameraUp);
 
     // Link model, view, and projection matrices to the vertex shader
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -298,7 +235,11 @@ void updateVideo()
     unsigned int offset = 0;
     for(Object o : *AllObjects){
         model = glm::translate(glm::mat4(1.0f), o.position);
+        model = glm::scale(model, o.size);
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        for(int i = 0; i < o.indexCount; i += 3){
+            checkCollision(offset + i, model);
+        }
         glDrawElements(GL_TRIANGLES, o.indexCount, GL_UNSIGNED_INT, (void*)(offset * sizeof(GLuint)));
         offset += o.indexCount;
     }
