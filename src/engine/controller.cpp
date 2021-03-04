@@ -6,12 +6,12 @@ const float BASE_SPEED = 0.0005f;
 // **** Controls **** //
 
 // Handle WASD 
-void playerMove(int i, unsigned int delta)
+void playerMove(int i)
 {
     glm::vec3 globalUp = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::vec3 cameraRight = glm::normalize(glm::cross(globalUp, player->facing));
     // Modify movement amount based on delta time
-    float speed = BASE_SPEED * delta;
+    float speed = BASE_SPEED * deltaTime;
     switch(i){
         case 0 : // W
             player->velocity += glm::normalize(glm::cross(cameraRight, globalUp)) * speed;

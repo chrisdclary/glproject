@@ -78,17 +78,19 @@ extern Player* player;
 
 extern std::vector <Object>* AllObjects;
 
+extern unsigned int deltaTime;
+
 
 // Subsystem Prototypes
 void initVideo();
 void updateVideo();
 void processKeyboard();
-void playerMove(int, unsigned int);
+void playerMove(int);
 void cameraMove(int, int);
 void clearVideoBuffers();
 void showFPS(int, unsigned int);
 void initLevel();
-void doPhysics(unsigned int);
+void doPhysics();
 
 // Engine prototypes
 void initEngine();

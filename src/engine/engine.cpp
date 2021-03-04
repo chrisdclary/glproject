@@ -9,6 +9,7 @@ SDL_Event e;
 // Delta time & Frame time
 unsigned int  frameTime = 0, lastTime = 0, deltaTime = 0;
 
+
 // Initialize global objects
 Player* player = new Player;
 VertexContainer* drawVerts = new VertexContainer;
@@ -45,22 +46,22 @@ void processKeyboard(){
     const Uint8 *state = SDL_GetKeyboardState(NULL);
                     
     if (state[SDL_SCANCODE_D]){
-        playerMove(3, deltaTime);
+        playerMove(3);
     }
     if (state[SDL_SCANCODE_A]){
-        playerMove(1, deltaTime);
+        playerMove(1);
     }
     if (state[SDL_SCANCODE_S]){
-        playerMove(2, deltaTime);
+        playerMove(2);
     }
     if (state[SDL_SCANCODE_W]){
-        playerMove(0, deltaTime);
+        playerMove(0);
     }
     if (state[SDL_SCANCODE_SPACE]){
-        playerMove(4, deltaTime);
+        playerMove(4);
     }
     if (state[SDL_SCANCODE_LSHIFT]){
-        playerMove(5, deltaTime);
+        playerMove(5);
     }      
     if (state[SDL_SCANCODE_ESCAPE]){
         quitSDL();
@@ -120,7 +121,7 @@ void updateEngine()
 {
     updateTime();
     processKeyboard();
-    doPhysics(deltaTime);
+    doPhysics();
     pollEvents();
     updateVideo();
 }

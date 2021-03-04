@@ -12,7 +12,7 @@ unsigned int createCube(unsigned int);
 void initLevel()
 {
     // Player starting position
-    player->position = glm::vec3(0.0f, 4.0f, 10.0f);
+    player->position = glm::vec3(0.0f, 80.0f, 10.0f);
 
     printf("initializing level");
     unsigned int offset = 0;
@@ -39,6 +39,8 @@ void initLevel()
     drawVerts->vertices.insert(drawVerts->vertices.end(), groundData.begin(), groundData.end());
     drawVerts->indices.insert(drawVerts->indices.end(), groundIndex.begin(), groundIndex.end());
 
+
+    // Just add a bunch of playforms to jump on
     int i;
     for (i = 1; i <= 20; i++){
         offset = createCube(offset);
@@ -46,6 +48,7 @@ void initLevel()
         AllObjects->at(i).rotation.y = i * 72.0f;
     }
 
+    // This is currently the best way to modify objects, i'll make something better later
     AllObjects->at(1).position = glm::vec3(10.0f, 8.0f, 10.0f);
     AllObjects->at(2).position = glm::vec3(15.0f, 16.0f, -10.0f);
     AllObjects->at(3).position = glm::vec3(0.0f, 24.0f, -20.0f);

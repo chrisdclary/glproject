@@ -1,5 +1,6 @@
 #include "engine.h"
 
+// Contains data for a basic cube
 unsigned int createCube(unsigned int offset) {
     std::vector <float> cubeData = {
         -1.0f, -1.0, 1.0f,              1.0f, 0.0f, 0.0f,

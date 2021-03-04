@@ -1,31 +1,31 @@
 #include "engine.h"
 
-void doPhysics(unsigned int delta) 
+void doPhysics() 
 {
     float gravity = pow(0.0098f, 2);
 
     // Do physics for any physics objects
     for( Object& o : *AllObjects){
         if(o.physics){
-            o.position.y += o.velocity.y * (delta);
-            o.velocity.y -= gravity * (delta);
+            o.position.y += o.velocity.y * (deltaTime);
+            o.velocity.y -= gravity * (deltaTime);
         }
     }
 
     // Show velocity
-    // std::cout << glm::to_string(player->velocity) << "\n";
     
-    // Update player position based on velocity
-    player->position.x += player->velocity.x * (delta);
-    player->position.y += player->velocity.y * (delta);
-    player->position.z += player->velocity.z * (delta);
 
     // Slow down player when they are not pressing movement keys
     player->velocity.x = player->velocity.x / 1.005;
     player->velocity.z = player->velocity.z / 1.005;
 
     // Apply gravity
-    player->velocity.y -= gravity * (delta);
+    player->velocity.y -= gravity * (deltaTime);
+    
+    // Update player position based on velocity
+    player->position.x += player->velocity.x * (deltaTime);
+    player->position.y += player->velocity.y * (deltaTime);
+    player->position.z += player->velocity.z * (deltaTime);
 
 }
 
@@ -135,24 +135,17 @@ void checkCollision(unsigned int offset, glm::mat4 model)
     }
 
     // **** If there is a collision, do stuff **** //
+    player->position -= player->velocity;   // Player kind of gets stuck in walls without this
+
+    // Bounce the player off the surface
+    player->velocity = glm::reflect(player->velocity, triNorm);
+    player->position += player->velocity;
 
     // If the normal of the collided triangle is mostly facing vertically
     if((abs(triNorm.y) > abs(triNorm.x)) && (abs(triNorm.y) > abs(triNorm.z))) {
-        player->position = player->position - player->velocity;
         player->velocity.y = 0.0f;
         if(triNorm.y > 0)
-            player->state = 0;
-    }
-
-    if((abs(triNorm.x) > abs(triNorm.y)) && (abs(triNorm.x) > abs(triNorm.z))) {
-        std::cout << "Position: " << glm::to_string(player->position) << "\n";
-        std::cout << "Velocity: " << glm::to_string(player->velocity) << "\n";
-        player->position.x -= player->velocity.x;
-        player->velocity.x = 0.0f;
-    }
-    if((abs(triNorm.z) > abs(triNorm.y)) && (abs(triNorm.z) > abs(triNorm.x))) {
-        player->position.z -= player->velocity.z;
-        player->velocity.z = 0.0f;
+            player->state = 0; // Reset jump if normal is facing up
     }
 
 }
