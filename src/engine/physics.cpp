@@ -4,36 +4,37 @@ void doPhysics(unsigned int delta)
 {
     float gravity = pow(0.0098f, 2);
 
-    if( player->velocity.y > 0.5f) // Cap velocity at .5 units
-        player->velocity.y = 0.5f;
-
+    // Do physics for any physics objects
     for( Object& o : *AllObjects){
         if(o.physics){
             o.position.y += o.velocity.y * (delta);
             o.velocity.y -= gravity * (delta);
-
-            // if(o.position.y <= -4.0f) { // o has landed
-            //     o.position.y = -4.0f;
-            //     o.velocity.y = 0.0f;
-            //     o.state = 0;
-            // }
         }
     }
+
+    // Show velocity
+    // std::cout << glm::to_string(player->velocity) << "\n";
     
-
+    // Update player position based on velocity
+    player->position.x += player->velocity.x * (delta);
     player->position.y += player->velocity.y * (delta);
-    player->velocity.y -= gravity * (delta);
+    player->position.z += player->velocity.z * (delta);
 
-    // if(player->position.y <= -4.0f) { // Player has landed
-    //     player->velocity.y = 0.0f;
-    //     player->state = 0;
-    // }
+    // Slow down player when they are not pressing movement keys
+    player->velocity.x = player->velocity.x / 1.005;
+    player->velocity.z = player->velocity.z / 1.005;
+
+    // Apply gravity
+    player->velocity.y -= gravity * (delta);
 
 }
 
+// **** Helper Functions for checkCollision **** //
 
 bool testAxis(glm::vec3 testAxis, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3)
 {
+
+    
     glm::vec3 xAxis = glm::vec3(1.0f, 0.0f, 0.0f);
     glm::vec3 yAxis = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::vec3 zAxis = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -55,69 +56,47 @@ bool testAxis(glm::vec3 testAxis, glm::vec3 v1, glm::vec3 v2, glm::vec3 v3)
     return true;
 }
 
+glm::vec3 getVertexData(unsigned int offset, glm::mat4 model)
+{
+    glm::vec4 temp;
+    // Get vertex's position from drawVerts
+    int cur = (drawVerts->indices[offset] * 6);
+    temp.x = drawVerts->vertices[cur];
+    temp.y = drawVerts->vertices[cur+1];
+    temp.z = drawVerts->vertices[cur+2];
+    temp.w = (1.0f); // Vertex represents a position in space, so w is 1
+
+    // Apply model transform to get the vertex's absolute position in space
+    temp = model * temp;
+
+    // Subtract player position to get coordinates relative to player
+    glm::vec3 temp2(temp);
+    temp2 -= player->position;
+
+    return temp2;
+}
+
 
 void checkCollision(unsigned int offset, glm::mat4 model)
 {
-    // 3 points of the triangle to be checked
-    glm::vec4 v1_2;
-    glm::vec4 v2_2;
-    glm::vec4 v3_2;
+    // Get vertex location relative to the player
+    glm::vec3 v1 = getVertexData(offset, model);
+    glm::vec3 v2 = getVertexData(offset+1, model);
+    glm::vec3 v3 = getVertexData(offset+2, model);
 
-    // Retrieve vertex data from drawVerts
-    int cur = (drawVerts->indices[offset] * 6);
-    float temp = drawVerts->vertices[cur];
-    v1_2.x = temp;
-    temp = drawVerts->vertices[cur+1];
-    v1_2.y = temp;
-    temp = drawVerts->vertices[cur+2];
-    v1_2.z = temp;
+    // **** For a collision to happen, there must be no separation across 13 axes **** //
 
-    cur = (drawVerts->indices[offset+1] * 6);
-    temp = drawVerts->vertices[cur];
-    v2_2.x = temp;
-    temp = drawVerts->vertices[cur+1];
-    v2_2.y = temp;
-    temp = drawVerts->vertices[cur+2];
-    v2_2.z = temp;
+    // 3 Cardinal directions / player hitbox normals
+    glm::vec3 xAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+    glm::vec3 yAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 zAxis = glm::vec3(0.0f, 0.0f, 1.0f);
 
-    cur = (drawVerts->indices[offset+2] * 6);
-    temp = drawVerts->vertices[cur];
-    v3_2.x = temp;
-    temp = drawVerts->vertices[cur+1];
-    v3_2.y = temp;
-    temp = drawVerts->vertices[cur+2];
-    v3_2.z = temp;
-
-    // Gross hacky stuff to apply matrix transformations to a vec3
-
-    v1_2.w = 1.0f;
-    v2_2.w = 1.0f;
-    v3_2.w = 1.0f;
-
-    glm::vec4 v1_3 = model * v1_2;
-    glm::vec4 v2_3 = model * v2_2;
-    glm::vec4 v3_3 = model * v3_2;
-
-    glm::vec3 v1(v1_3);
-    glm::vec3 v2(v2_3);
-    glm::vec3 v3(v3_3);
-
-    v1 -= player->position;
-    v2 -= player->position;
-    v3 -= player->position;
-
+    // 9 Axes formed by crossing player hitbox's normals & triangle edges
     // Triangle edges
     glm::vec3 e1 = v2 - v1;
     glm::vec3 e2 = v3 - v2;
     glm::vec3 e3 = v1 - v3;
 
-    //printf("Collision data:\nTriangle - v1: %f, %f, %f  v2: %f, %f, %f  v3: %f, %f, %f", v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z);
-
-    glm::vec3 xAxis = glm::vec3(1.0f, 0.0f, 0.0f);
-    glm::vec3 yAxis = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::vec3 zAxis = glm::vec3(0.0f, 0.0f, 1.0f);
-
-    // Compute the 9 axis (player AABB normals to the triangle edges)
     glm::vec3 xAxis_e1 = glm::cross(xAxis, e1);
     glm::vec3 xAxis_e2 = glm::cross(xAxis, e2);
     glm::vec3 xAxis_e3 = glm::cross(xAxis, e3);
@@ -130,8 +109,11 @@ void checkCollision(unsigned int offset, glm::mat4 model)
     glm::vec3 zAxis_e2 = glm::cross(zAxis, e2);
     glm::vec3 zAxis_e3 = glm::cross(zAxis, e3);
 
+    // The triangle's normal itself
     glm::vec3 triNorm = glm::cross(e1, e2);
+    triNorm = glm::normalize(triNorm);
 
+    // Throw them all in a vector and check for separation against every axis
     std::vector <glm::vec3> axes;
     axes.push_back(xAxis_e1);
     axes.push_back(xAxis_e2);
@@ -148,12 +130,31 @@ void checkCollision(unsigned int offset, glm::mat4 model)
     axes.push_back(triNorm);
 
     for (glm::vec3 tempAxis : axes) {
-        if(!testAxis(tempAxis, v1, v2, v3)) 
+        if(!testAxis(tempAxis, v1, v2, v3))     // If any axis shows separation, there is no collision
             return;
     }
 
-    //printf("Relative position: %f, %f, %f\n", v1.x, v1.y, v1.z);
-    player->velocity.y = 0.0f;
-    player->state = 0;
+    // **** If there is a collision, do stuff **** //
+
+    // If the normal of the collided triangle is mostly facing vertically
+    if((abs(triNorm.y) > abs(triNorm.x)) && (abs(triNorm.y) > abs(triNorm.z))) {
+        player->position = player->position - player->velocity;
+        player->velocity.y = 0.0f;
+        if(triNorm.y > 0)
+            player->state = 0;
+    }
+
+    if((abs(triNorm.x) > abs(triNorm.y)) && (abs(triNorm.x) > abs(triNorm.z))) {
+        std::cout << "Position: " << glm::to_string(player->position) << "\n";
+        std::cout << "Velocity: " << glm::to_string(player->velocity) << "\n";
+        player->position.x -= player->velocity.x;
+        player->velocity.x = 0.0f;
+    }
+    if((abs(triNorm.z) > abs(triNorm.y)) && (abs(triNorm.z) > abs(triNorm.x))) {
+        player->position.z -= player->velocity.z;
+        player->velocity.z = 0.0f;
+    }
 
 }
+
+

@@ -118,9 +118,9 @@ void quitSDL()
 
 void updateEngine()
 {
-    updateVideo();
     updateTime();
     processKeyboard();
-    pollEvents();
     doPhysics(deltaTime);
+    pollEvents();
+    updateVideo();
 }

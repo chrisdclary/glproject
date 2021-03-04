@@ -22,13 +22,16 @@ class Object
 public:
     int indexCount;                                     // number of indices, so the draw function knows where one object ends
     bool physics = false;                               // Whether physics act on this object
+    bool collide = true;                                // Player can collide with this object
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);   // Position
-    glm::vec3 size = glm::vec3(1.0f, 1.0f, 1.0f);
+    glm::vec3 size = glm::vec3(1.0f, 1.0f, 1.0f);       // Scale
+    glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f);   // Rotation - holds the degrees of rotations about each axis
     glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
     int state = 1;
     std::string type;
 };  
 
+// Axis-aligned bounding box
 class AABB
 {
 public:
@@ -65,10 +68,11 @@ public:
     glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 facing = glm::vec3(0.0f, 0.0f, -1.0f);
     int state = 0;
-    AABB hitbox = AABB(glm::vec3(-1.0f, -2.0f, -1.0f), glm::vec3(1.0f, 2.0f, 1.0f));
+    // Player AABB always stays at the origin, this makes collision calculations a little easier
+    AABB hitbox = AABB(glm::vec3(-1.0f, -4.0f, -1.0f), glm::vec3(1.0f, 4.0f, 1.0f));
 };
 
-// To be used throughout the engine
+// drawVerts holds vertex data BEFORE transformations i.e. vertex position in its own relative space
 extern VertexContainer* drawVerts;
 extern Player* player;
 

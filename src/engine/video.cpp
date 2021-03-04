@@ -235,10 +235,14 @@ void updateVideo()
     unsigned int offset = 0;
     for(Object o : *AllObjects){
         model = glm::translate(glm::mat4(1.0f), o.position);
+        model = glm::rotate(model, glm::radians(o.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(o.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(o.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
         model = glm::scale(model, o.size);
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         for(int i = 0; i < o.indexCount; i += 3){
-            checkCollision(offset + i, model);
+            if(o.collide) // Check collision if object is collidable
+                checkCollision(offset + i, model);
         }
         glDrawElements(GL_TRIANGLES, o.indexCount, GL_UNSIGNED_INT, (void*)(offset * sizeof(GLuint)));
         offset += o.indexCount;
