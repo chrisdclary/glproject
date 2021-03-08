@@ -135,11 +135,10 @@ void checkCollision(unsigned int offset, glm::mat4 model)
     }
 
     // **** If there is a collision, do stuff **** //
-    player->position -= player->velocity;   // Player kind of gets stuck in walls without this
+    player->position -= player->velocity;   // return player to their position before the collision
 
     // Bounce the player off the surface
-    player->velocity = glm::reflect(player->velocity, triNorm);
-    player->position += player->velocity;
+    
 
     // If the normal of the collided triangle is mostly facing vertically
     if((abs(triNorm.y) > abs(triNorm.x)) && (abs(triNorm.y) > abs(triNorm.z))) {
@@ -147,6 +146,16 @@ void checkCollision(unsigned int offset, glm::mat4 model)
         if(triNorm.y > 0)
             player->state = 0; // Reset jump if normal is facing up
     }
+
+    // Dampen player's horizontal movement if they are hitting a wall
+    else {
+        player->velocity.x *= 0.9f;    
+        player->velocity.z *= 0.9f; 
+    }
+
+    player->velocity.x += (triNorm.x * 0.02f);
+    player->velocity.z += (triNorm.z * 0.02f);
+    player->position += player->velocity;
 
 }
 

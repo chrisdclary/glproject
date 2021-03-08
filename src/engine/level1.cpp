@@ -12,7 +12,7 @@ unsigned int createCube(unsigned int);
 void initLevel()
 {
     // Player starting position
-    player->position = glm::vec3(0.0f, 80.0f, 10.0f);
+    player->position = glm::vec3(0.0f, 8.0f, 10.0f);
 
     printf("initializing level");
     unsigned int offset = 0;

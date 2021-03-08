@@ -18,6 +18,8 @@ std::vector <Object>* AllObjects = new std::vector <Object>;
 // Initialize framerate counter
 int frames = 0; 
 
+void updateTime();
+
 void initEngine()
 {
     printf("Initializing SDL.\n");
@@ -39,6 +41,8 @@ void initEngine()
 
     // Initialize video subsystem
     initVideo();
+
+    updateTime();
 }
 
 // Process Keyboard Input
