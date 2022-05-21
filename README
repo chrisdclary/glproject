@@ -1,5 +1,12 @@
-A 3D Platforming game I'm building from the ground up using SDL2.
-Modularity is very low at the moment, when it's more complete I may go back and make it more 
-user-friendly so other people can use the engine to make their own games.
+A persoal project that just serves as an exercise in 3D graphics and physics.
+A very basic demo
+
+CONTROLS:
+W - Forwards
+S - Backwards
+A - Left
+D - Right
+Space - Jump
+Mouse - Camera
 
 All of my source code is contained in the src directory
