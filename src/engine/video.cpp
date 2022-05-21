@@ -16,7 +16,7 @@ glm::vec3 cameraUp;
 // Settings for perspective camera
 const float fov = 60.0f; // Camera field of view
 const float near_plane = 0.1f; // Near clipping plane
-const float far_plane = 200.0f; // Far clipping plane
+const float far_plane = 400.0f; // Far clipping plane
 
 
 // Window

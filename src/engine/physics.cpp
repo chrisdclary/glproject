@@ -137,9 +137,6 @@ void checkCollision(unsigned int offset, glm::mat4 model)
     // **** If there is a collision, do stuff **** //
     player->position -= player->velocity;   // return player to their position before the collision
 
-    // Bounce the player off the surface
-    
-
     // If the normal of the collided triangle is mostly facing vertically
     if((abs(triNorm.y) > abs(triNorm.x)) && (abs(triNorm.y) > abs(triNorm.z))) {
         player->velocity.y = 0.0f;
@@ -153,9 +150,10 @@ void checkCollision(unsigned int offset, glm::mat4 model)
         player->velocity.z *= 0.9f; 
     }
 
+    // reduce player's velocity based on the normal of the collided surface
     player->velocity.x += (triNorm.x * 0.02f);
     player->velocity.z += (triNorm.z * 0.02f);
-    player->position += player->velocity;
+    player->position += player->velocity;   // Move player along new non-colliding velocity
 
 }
 
